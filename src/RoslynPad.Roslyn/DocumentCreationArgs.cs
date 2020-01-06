@@ -1,4 +1,5 @@
 using System;
+using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.Text;
 using RoslynPad.Roslyn.Diagnostics;
 
@@ -20,5 +21,7 @@ namespace RoslynPad.Roslyn
         public Action<DiagnosticsUpdatedArgs>? OnDiagnosticsUpdated { get; }
         public Action<SourceText>? OnTextUpdated { get; }
         public string? Name { get; }
+
+        public DocumentId? DocumentId { get; set; }
     }
 }

@@ -119,6 +119,44 @@ namespace RoslynPad.Editor
             return _documentId;
         }
 
+        public void LoadDocument(DocumentId documentId, IRoslynHost roslynHost)
+        {
+            _documentId = documentId;
+            _roslynHost = roslynHost ?? throw new ArgumentNullException(nameof(roslynHost));
+            _classificationHighlightColors = new ClassificationHighlightColors();
+
+            _braceMatcherHighlighter = new BraceMatcherHighlightRenderer(TextArea.TextView, _classificationHighlightColors);
+
+            _quickInfoProvider = _roslynHost.GetService<IQuickInfoProvider>();
+            _braceMatchingService = _roslynHost.GetService<IBraceMatchingService>();
+
+            var avalonEditTextContainer = new AvalonEditTextContainer(Document) { Editor = this };
+
+            var creatingDocumentArgs = new CreatingDocumentEventArgs(avalonEditTextContainer, ProcessDiagnostics);
+            OnCreatingDocument(creatingDocumentArgs);
+
+            var document = roslynHost.GetDocument(documentId);
+            var documentText = document?.GetTextAsync().GetAwaiter().GetResult();
+
+            roslynHost.AddDocument(new DocumentCreationArgs(avalonEditTextContainer, "",
+                args => ProcessDiagnostics(args), text => avalonEditTextContainer.UpdateText(text))
+            { DocumentId = documentId });
+
+            AppendText(documentText?.ToString());
+            Document.UndoStack.ClearAll();
+            AsyncToolTipRequest = OnAsyncToolTipRequest;
+
+            RefreshHighlighting();
+
+            _contextActionsRenderer = new ContextActionsRenderer(this, _textMarkerService) { IconImage = ContextActionsIcon };
+            _contextActionsRenderer.Providers.Add(new RoslynContextActionProvider(documentId, _roslynHost));
+
+            var completionProvider = new RoslynCodeEditorCompletionProvider(documentId, _roslynHost);
+            completionProvider.Warmup();
+
+            CompletionProvider = completionProvider;
+        }
+
         public void RefreshHighlighting()
         {
             if (_colorizer != null)
@@ -217,7 +255,7 @@ namespace RoslynPad.Editor
             }
         }
 
-        protected void ProcessDiagnostics(DiagnosticsUpdatedArgs args)
+        public void ProcessDiagnostics(DiagnosticsUpdatedArgs args)
         {
             if (this.GetDispatcher().CheckAccess())
             {

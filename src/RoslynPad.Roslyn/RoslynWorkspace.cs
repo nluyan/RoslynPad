@@ -48,7 +48,15 @@ namespace RoslynPad.Roslyn
         public void OpenDocument(DocumentId documentId, SourceTextContainer textContainer)
         {
             OpenDocumentId = documentId;
+            //OpenDocument(documentId);
             OnDocumentOpened(documentId, textContainer);
+            OnDocumentContextUpdated(documentId);
+        }
+
+        public void CloseDocument(DocumentId documentId, SourceTextContainer textContainer)
+        {
+            OpenDocumentId = null;
+            OnDocumentClosed(documentId, TextLoader.From(textContainer, VersionStamp.Default));
             OnDocumentContextUpdated(documentId);
         }
 
