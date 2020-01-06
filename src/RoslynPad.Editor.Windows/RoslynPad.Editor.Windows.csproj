@@ -2,11 +2,13 @@
 <Project Sdk="Microsoft.NET.Sdk.WindowsDesktop">
   <PropertyGroup>
     <OutputType>Library</OutputType>
-    <TargetFrameworks>netcoreapp3.1;net462</TargetFrameworks>
+    <TargetFrameworks>net462</TargetFrameworks>
     <UseWPF>true</UseWPF>
     <RootNamespace>RoslynPad.Editor</RootNamespace>
     <Version>$(EditorPackageVersion)</Version>
     <Description>Provides a Roslyn-based code editor using AvalonEdit (WPF platform) with completion, diagnostics, and quick actions</Description>
+    <LangVersion>8.0</LangVersion>
+    <Nullable>Enable</Nullable>
   </PropertyGroup>
   <ItemGroup>
     <ProjectReference Include="..\RoslynPad.Roslyn.Windows\RoslynPad.Roslyn.Windows.csproj" />

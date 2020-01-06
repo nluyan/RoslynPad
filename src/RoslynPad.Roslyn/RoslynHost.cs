@@ -34,8 +34,8 @@ namespace RoslynPad.Roslyn
                 // RoslynPad.Roslyn
                 typeof(RoslynHost).Assembly);
 
-        private readonly ConcurrentDictionary<DocumentId, RoslynWorkspace> _workspaces;
-        private readonly ConcurrentDictionary<DocumentId, Action<DiagnosticsUpdatedArgs>> _diagnosticsUpdatedNotifiers;
+        protected readonly ConcurrentDictionary<DocumentId, RoslynWorkspace> _workspaces;
+        protected readonly ConcurrentDictionary<DocumentId, Action<DiagnosticsUpdatedArgs>> _diagnosticsUpdatedNotifiers;
         private readonly IDocumentationProviderService _documentationProviderService;
         private readonly CompositionHost _compositionContext;
         private int _documentNumber;
@@ -183,7 +183,7 @@ namespace RoslynPad.Roslyn
 
         public virtual RoslynWorkspace CreateWorkspace() => new RoslynWorkspace(HostServices, roslynHost: this);
 
-        public void CloseDocument(DocumentId documentId)
+        public virtual void CloseDocument(DocumentId documentId)
         {
             if (documentId == null) throw new ArgumentNullException(nameof(documentId));
 
@@ -213,7 +213,7 @@ namespace RoslynPad.Roslyn
             _diagnosticsUpdatedNotifiers.TryRemove(documentId, out _);
         }
 
-        public Document? GetDocument(DocumentId documentId)
+        public virtual Document? GetDocument(DocumentId documentId)
         {
             if (documentId == null) throw new ArgumentNullException(nameof(documentId));
 
@@ -222,7 +222,7 @@ namespace RoslynPad.Roslyn
                 : null;
         }
 
-        public DocumentId AddDocument(DocumentCreationArgs args)
+        public virtual DocumentId AddDocument(DocumentCreationArgs args)
         {
             if (args == null) throw new ArgumentNullException(nameof(args));
             if (args.SourceTextContainer == null) throw new ArgumentNullException(nameof(args.SourceTextContainer));
@@ -247,7 +247,7 @@ namespace RoslynPad.Roslyn
             return documentId;
         }
 
-        private DocumentId AddDocument(RoslynWorkspace workspace, DocumentCreationArgs args, Document? previousDocument = null)
+        protected DocumentId AddDocument(RoslynWorkspace workspace, DocumentCreationArgs args, Document? previousDocument = null)
         {
             var project = CreateProject(workspace.CurrentSolution, args,
                 CreateCompilationOptions(args, previousDocument == null), previousDocument?.Project);
@@ -276,7 +276,7 @@ namespace RoslynPad.Roslyn
             return documentId;
         }
 
-        public void UpdateDocument(Document document)
+        public virtual void UpdateDocument(Document document)
         {
             if (document == null) throw new ArgumentNullException(nameof(document));
 
