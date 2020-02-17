@@ -73,10 +73,10 @@ namespace RoslynPad.Roslyn
 
         protected override void ApplyDocumentTextChanged(DocumentId document, SourceText newText)
         {
-            if (OpenDocumentId != document)
-            {
-                return;
-            }
+            //if (OpenDocumentId != document)
+            //{
+            //    return;
+            //}
 
             ApplyingTextChange?.Invoke(document, newText);
 

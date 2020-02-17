@@ -142,7 +142,8 @@ namespace RoslynPad.Editor
                 args => ProcessDiagnostics(args), text => avalonEditTextContainer.UpdateText(text))
             { DocumentId = documentId });
 
-            AppendText(documentText?.ToString());
+            Text = documentText?.ToString();
+            //AppendText(documentText?.ToString());
             Document.UndoStack.ClearAll();
             AsyncToolTipRequest = OnAsyncToolTipRequest;
 
@@ -196,8 +197,12 @@ namespace RoslynPad.Editor
             var caretOffset = CaretOffset;
             if (caretOffset <= text.Length)
             {
-                var result = await _braceMatchingService.GetAllMatchingBracesAsync(document, caretOffset, token).ConfigureAwait(true);
-                _braceMatcherHighlighter.SetHighlight(result.leftOfPosition, result.rightOfPosition);
+                try
+                {
+                    var result = await _braceMatchingService.GetAllMatchingBracesAsync(document, caretOffset, token).ConfigureAwait(true);
+                    _braceMatcherHighlighter.SetHighlight(result.leftOfPosition, result.rightOfPosition);
+                }
+                catch { }
             }
         }
 

@@ -8,7 +8,7 @@ namespace RoslynPad
         [STAThread]
         static void Main(string[] args)
         {
-            AppBuilder.Configure<App>()
+             AppBuilder.Configure<App>()
                 .UsePlatformDetect()
                 .Start<MainWindow>();
         }
