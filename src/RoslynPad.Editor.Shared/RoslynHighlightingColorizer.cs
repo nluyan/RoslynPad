@@ -25,9 +25,17 @@ namespace RoslynPad.Editor
             _highlightColors = highlightColors;
         }
 
+        IHighlighter? highlighter = null;
+
         protected override IHighlighter CreateHighlighter(TextView textView, TextDocument document)
         {
-            return new RoslynSemanticHighlighter(textView, document, _documentId, _roslynHost, _highlightColors);
+            highlighter = new RoslynSemanticHighlighter(textView, document, _documentId, _roslynHost, _highlightColors);
+            return highlighter;
+        }
+
+        public IHighlighter? GetCachedHighlighter()
+        {
+            return highlighter;
         }
     }
 }

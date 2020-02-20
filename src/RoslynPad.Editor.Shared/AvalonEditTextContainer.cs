@@ -122,7 +122,7 @@ namespace RoslynPad.Editor
             private readonly AvalonEditTextContainer _container;
             private readonly SourceText _sourceText;
 
-            public AvalonEditSourceText(AvalonEditTextContainer container, string text) : this(container, From(text))
+            public AvalonEditSourceText(AvalonEditTextContainer container, string text) : this(container, From(text, Encoding.UTF8))
             {
             }
 
