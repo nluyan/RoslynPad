@@ -41,7 +41,7 @@ using System.Linq;
 
 namespace RoslynPad.Editor
 {
-    internal sealed class RoslynSemanticHighlighter : IHighlighter
+    public sealed class RoslynSemanticHighlighter : IHighlighter
     {
         private const int CacheSize = 512;
         private const int DelayInMs = 100;
@@ -139,6 +139,39 @@ namespace RoslynPad.Editor
             {
                 _updatedLine = lineNumber;
             }
+        }
+
+        public async Task<HighlightedLine> HighlightLineNow(int lineNumber)
+        {
+            var documentLine = _document.GetLineByNumber(lineNumber);
+            var line = new HighlightedLine(_document, documentLine);
+            var document = _roslynHost.GetDocument(_documentId);
+
+            IEnumerable<ClassifiedSpan> spans = await GetClassifiedSpansAsync(document!, documentLine).ConfigureAwait(true);
+
+            // rebuild sections
+            var sections = new List<HighlightedSection>();
+            foreach (var classifiedSpan in spans)
+            {
+                var textSpan = AdjustTextSpan(classifiedSpan, documentLine);
+                if (textSpan == null)
+                {
+                    continue;
+                }
+
+                sections.Add(new HighlightedSection
+                {
+                    Color = _highlightColors.GetBrush(classifiedSpan.ClassificationType),
+                    Offset = textSpan.Value.Start,
+                    Length = textSpan.Value.Length
+                });
+            }
+
+            line.Sections.Clear();
+            foreach (var section in sections)
+                line.Sections.Add(section);
+
+            return line;
         }
 
         public HighlightedLine HighlightLine(int lineNumber)
