@@ -12,11 +12,36 @@ namespace RoslynPad.Roslyn.Rename
 {
     public static class RenameHelper
     {
-        public static async Task<ISymbol?> GetRenameSymbol(
-            Document document, int position, CancellationToken cancellationToken = default)
+        public static async Task<ISymbol?> GetGotoDefinitionSymbol(Document document, int position, CancellationToken cancellationToken = default)
         {
             var token = await document.GetTouchingWordAsync(position, cancellationToken).ConfigureAwait(false);
-            return token != default 
+            return token != default
+                    ? await GetGotoDefinitionSymbol(document, token, cancellationToken).ConfigureAwait(false)
+                    : null;
+        }
+
+        public static async Task<ISymbol?> GetGotoDefinitionSymbol(Document document, SyntaxToken triggerToken, CancellationToken cancellationToken)
+        {
+            var syntaxFactsService = document.Project.LanguageServices.GetRequiredService<ISyntaxFactsService>();
+            if (syntaxFactsService.IsReservedOrContextualKeyword(triggerToken))
+            {
+                return null;
+            }
+
+            var semanticModel = await document.GetSemanticModelAsync(cancellationToken).ConfigureAwait(false);
+            var semanticFacts = document.GetLanguageService<ISemanticFactsService>();
+
+            var tokenRenameInfo = RenameUtilities.GetTokenRenameInfo(semanticFacts, semanticModel, triggerToken, cancellationToken);
+
+            var triggerSymbol = tokenRenameInfo.HasSymbols ? tokenRenameInfo.Symbols.First() : null;
+            return triggerSymbol;
+        }
+
+        public static async Task<ISymbol?> GetRenameSymbol(
+        Document document, int position, CancellationToken cancellationToken = default)
+        {
+            var token = await document.GetTouchingWordAsync(position, cancellationToken).ConfigureAwait(false);
+            return token != default
                     ? await GetRenameSymbol(document, token, cancellationToken).ConfigureAwait(false)
                     : null;
         }
